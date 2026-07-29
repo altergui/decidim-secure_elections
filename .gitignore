@@ -1,0 +1,16 @@
+/development_app/
+/spec/decidim_dummy_app/
+/coverage/
+/pkg/
+/tmp/
+/node_modules/
+/vendor/bundle/
+.bundle/
+Gemfile.lock
+.env
+.env.*
+!.env.example
+*.gem
+.rspec-failures
+.byebug_history
+.DS_Store

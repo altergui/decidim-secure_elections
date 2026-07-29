@@ -1,0 +1,60 @@
+{
+  "name": "decidim-secure_elections",
+  "version": "0.1.0",
+  "description": "Verifiable elections for Decidim, powered by the Vocdoni Integrator SDK",
+  "license": "AGPL-3.0-or-later",
+  "homepage": "https://github.com/vocdoni/decidim-secure_elections",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vocdoni/decidim-secure_elections.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vocdoni/decidim-secure_elections/issues"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=24.18.0"
+  },
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint app/packs build",
+    "lint-fix": "eslint app/packs build --fix",
+    "stylelint": "stylelint \"app/packs/**/*.scss\"",
+    "build:vote": "node build/vote.mjs"
+  },
+  "stylelint": {
+    "extends": "./config/lint/decidim-stylelint.cjs"
+  },
+  "dependencies": {
+    "@vocdoni/api-client": "1.0.0",
+    "@vocdoni/api-voting": "0.1.0",
+    "@vocdoni/ballot": "0.1.0"
+  },
+  "overrides": {
+    "@noble/curves": "1.8.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/preset-env": "^7.23.9",
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^9.39.4",
+    "babel-jest": "^30.4.1",
+    "esbuild": "^0.28.1",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsdoc": "^63.0.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-no-relative-import-paths": "^1.6.1",
+    "eslint-plugin-promise": "^7.3.0",
+    "eslint-plugin-react": "^7.37.5",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1",
+    "js-yaml": "^4.1.0",
+    "postcss-scss": "^4.0.9",
+    "prettier": "^3.8.3",
+    "stylelint": "^17.8.0",
+    "stylelint-prettier": "^5.0.3"
+  }
+}

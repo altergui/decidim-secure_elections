@@ -1,0 +1,240 @@
+// The admin side of the module.
+//
+// Nearly everything on these screens is plain Decidim: cards, form fields, the
+// admin sticky bar. What is here are the few things Tailwind utilities cannot
+// express from the markup — the borderless title and question fields, the
+// height the sticky settings column is allowed to take, and a step navigation
+// that fits on a phone.
+
+// The step navigation above every screen of a single election.
+//
+// Decidim's `tab-x-container` is a plain flex row that neither wraps nor
+// scrolls. With six steps in it the row was wider than a phone, and because
+// nothing along the way is allowed to shrink, the *page* grew with it: at 390px
+// the whole admin panned sideways and "Publish" and "Monitor" sat off screen.
+// The row is allowed to wrap when there is no space, and never to widen its
+// container.
+.vocdoni-step-nav {
+  max-width: 100%;
+
+  // A flex item with the default `min-width: auto` cannot be narrower than its
+  // content, which is how the row of tabs was widening the page rather than
+  // being constrained by it.
+  .main-tabs-menu__tabs {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  ul.tab-x-container {
+    // Wrapping, not shrinking. The entries keep Decidim's `grow`, so they still
+    // fill the width on a desktop and simply fold onto a second and third line
+    // on a phone — every step stays visible and none is cut in half.
+    flex-wrap: wrap;
+    max-width: 100%;
+    min-width: 0;
+  }
+}
+
+.vocdoni-editor {
+  // A `<fieldset>` carries a UA rule no other element has: `min-width:
+  // min-content`, so it refuses to be narrower than its widest child and
+  // overflows its own container rather than shrinking inside it. Every grouping
+  // on these screens is a real fieldset with a real legend — that is what makes
+  // the ballot navigable from the keyboard — so the rule is undone once here
+  // instead of giving up the semantics to get a page that fits on a phone.
+  fieldset {
+    min-width: 0;
+  }
+
+  // Decidim's date picker replaces a `datetime-local` field with two text
+  // inputs of its own, built in the browser and outside the form builder's
+  // markup. They carry no width, so they fall back to the intrinsic size of a
+  // text input — about 235px, wider than the column they sit in and wider than
+  // a phone. They fill their column instead.
+  .datepicker__date-column > input,
+  .datepicker__time-column > input {
+    width: 100%;
+  }
+
+  // Borderless inputs, the way the Vocdoni app writes a voting process: the
+  // title reads as a heading and only shows its edges once it has focus.
+  //
+  // The size and the borderlessness are set from here rather than with utility
+  // classes on the field, because `Decidim::FormBuilder` passes the field's
+  // options straight to `error_for`: a `text-3xl font-bold` on the input landed
+  // on "cannot be blank" as well, and rendered it in display type.
+  &__title input,
+  .vocdoni-question__title input,
+  .vocdoni-question__description textarea,
+  input.border-0,
+  textarea.border-0 {
+    background-color: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding-left: 0;
+    padding-right: 0;
+
+    &:focus {
+      background-color: transparent;
+      box-shadow: none;
+      outline: 2px solid var(--focus, currentColor);
+      outline-offset: 2px;
+    }
+
+    &::placeholder {
+      opacity: 1;
+    }
+  }
+
+  &__title input {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    font-weight: 700;
+  }
+
+  .vocdoni-question__title input {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    font-weight: 700;
+  }
+
+  .vocdoni-question__title input,
+  .vocdoni-question__description textarea {
+    border-bottom: 1px solid var(--gray-3, #d1d5db);
+  }
+
+  // The error stays the size an error is, whatever the field above it does.
+  .form-error {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 400;
+  }
+
+  // The sticky settings column must never be taller than the viewport, or the
+  // census panel at its foot becomes unreachable.
+  &__settings {
+    @media (min-width: 1024px) {
+      max-height: calc(100vh - 2rem);
+      overflow-y: auto;
+    }
+  }
+
+  // Reordering and removal controls stay out of the way until the row they
+  // belong to is hovered or focused, but never disappear from the tab order.
+  .vocdoni-option [data-vocdoni-move-option],
+  .vocdoni-option [data-vocdoni-remove-option] {
+    opacity: 0.35;
+    transition: opacity 0.15s ease-in-out;
+  }
+
+  .vocdoni-option:hover [data-vocdoni-move-option],
+  .vocdoni-option:hover [data-vocdoni-remove-option],
+  .vocdoni-option:focus-within [data-vocdoni-move-option],
+  .vocdoni-option:focus-within [data-vocdoni-remove-option] {
+    opacity: 1;
+  }
+}
+
+// The monitoring page.
+//
+// A figure that changes has to be *seen* to change: the whole point of
+// refreshing in place is that the admin knows the number in front of them is
+// the new one.
+#js-vocdoni-monitor {
+  [data-just-updated="true"] {
+    color: var(--secondary, currentColor);
+    font-weight: 700;
+  }
+
+  // The refresh control while its job is in flight. It stays operable to a
+  // screen reader — `aria-busy` says what is happening — and stops looking
+  // like something worth pressing again.
+  [data-monitor-refresh][aria-busy="true"] {
+    cursor: progress;
+    opacity: 0.6;
+
+    svg {
+      animation: vocdoni-monitor-spin 1s linear infinite;
+    }
+  }
+}
+
+#js-vocdoni-monitor-results [data-just-updated="true"] {
+  color: var(--secondary, currentColor);
+  font-weight: 700;
+}
+
+@keyframes vocdoni-monitor-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #js-vocdoni-monitor [data-monitor-refresh][aria-busy="true"] svg {
+    animation: none;
+  }
+}
+
+// The census members table.
+//
+// Every cell is an input, so the rows are far taller than a normal table's and
+// the inputs have to be allowed to be narrow. Without this a table of five
+// columns is wider than a laptop and the horizontal scrollbar becomes the only
+// way to reach the last field of a row.
+#js-census-members {
+  table input {
+    min-width: 6rem;
+    margin-bottom: 0;
+  }
+
+  // One error per field — the form builder's own, above the input, the way
+  // every other Decidim form renders it — and never wide enough to stretch its
+  // column.
+  .form-error {
+    display: block;
+    margin-bottom: 0.25rem;
+    max-width: 16rem;
+  }
+
+  // A row the admin has ticked for removal, before the census is saved.
+  //
+  // The strike-through goes on the inputs rather than on the row: a form
+  // control is an atomic inline-level box, so `text-decoration` on an ancestor
+  // never reaches the text inside it, and striking the row through left every
+  // cell looking untouched. The dimming and the line are both decoration —
+  // the "will be removed when you save" note in the last cell is what actually
+  // says so, and it says it in words rather than in colour.
+  //
+  // The dimming stops at the actions cell. `opacity` applies to a whole
+  // stacking context, so a child cannot opt back out of it — and the remove
+  // checkbox and its note are the two things on the row that must stay at full
+  // contrast, because they are how the admin reads the state and undoes it.
+  [data-census-member-removed="true"] {
+    td:not(.table-list__actions) {
+      opacity: 0.6;
+    }
+
+    input:not([type="checkbox"]) {
+      text-decoration: line-through;
+    }
+  }
+
+  // The note itself. `[hidden]` is a user-agent rule with no specificity, so
+  // any `display` declaration anywhere beats it — which is exactly how
+  // `row.hidden = true` came to do nothing at all. Both states are spelled out
+  // here so neither depends on a rule that can be outranked by a utility
+  // class.
+  [data-census-member-removed-note] {
+    display: block;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+}

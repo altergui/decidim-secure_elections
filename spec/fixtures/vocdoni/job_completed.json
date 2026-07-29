@@ -1,0 +1,9 @@
+{
+  "jobId": "6885f1a3c1a4e2f0b1d33a10",
+  "type": "publish_voting_process",
+  "status": "completed",
+  "result": {
+    "status": "READY",
+    "address": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
+  }
+}

@@ -1,0 +1,40 @@
+---
+
+base_locale: en
+locales: [en]
+
+# `data.read` has to name every English source file. This module keeps three,
+# split by subject: the component and its admin, the census, and the strings the
+# static voting page is built from. `i18n-tasks` would otherwise see only
+# `en.yml` and report the other two as unused everywhere they are referenced.
+data:
+  read:
+    - config/locales/%{locale}.yml
+    - config/locales/%{locale}.census.yml
+    - config/locales/%{locale}.vote.yml
+  write:
+    - config/locales/%{locale}.yml
+
+search:
+  paths:
+    - app/
+    - lib/
+
+ignore_unused:
+  # Read by Decidim's registries and cells rather than by a `t()` call in this
+  # repository, so a static scan cannot see the reference.
+  - decidim.components.vocdoni.*
+  - decidim.resources.election.*
+  - decidim.statistics.*
+  - decidim.open_data.help.election_results.*
+  - decidim.events.secure_elections.*
+  - decidim.secure_elections.admin_log.*
+  - decidim.admin.filters.vocdoni.*
+  - activemodel.attributes.*
+  - activerecord.models.*
+  # The voting page is a static page built by `npm run build:vote`; the whole
+  # subtree is read by JavaScript, not by Ruby.
+  - decidim.secure_elections.votes.page.*
+
+ignore_missing:
+  - decidim.participatory_processes.scopes.global

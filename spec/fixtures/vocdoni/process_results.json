@@ -1,0 +1,13 @@
+{
+  "id": "6885f0c2c1a4e2f0b1d33a01",
+  "questions": [
+    {
+      "questionId": "6885f0c2c1a4e2f0b1d33a02",
+      "upstreamId": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+      "voteCount": 2,
+      "maxVoters": 3,
+      "finalResults": false,
+      "results": [["1", "1"]]
+    }
+  ]
+}

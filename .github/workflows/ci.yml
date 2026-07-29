@@ -1,0 +1,158 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A second push to a pull request makes the first run irrelevant.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: "true"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - name: RuboCop
+        run: bundle exec rubocop --parallel
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Stylelint
+        run: npm run stylelint
+
+  javascript:
+    name: JavaScript tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - name: Jest
+        run: npm test
+
+  # The voting page is a committed build artefact: `public/vocdoni/` has to be
+  # what `npm run build:vote` produces from the current sources, or an operator
+  # installing the gem gets a page built from something else. The build is
+  # deterministic, so rebuilding and diffing is the whole check.
+  build-artefact:
+    name: Built voting page is in step with its sources
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build:vote
+
+      - name: Fail if the committed build is stale
+        run: |
+          if ! git diff --quiet -- public/vocdoni; then
+            echo "::error::public/vocdoni is out of date. Run 'npm run build:vote' and commit the result."
+            git --no-pager diff --stat -- public/vocdoni
+            exit 1
+          fi
+
+  ruby:
+    name: Ruby tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:16
+        ports: ["5432:5432"]
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7.2
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_HOST: localhost
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      REDIS_URL: redis://localhost:6379/0
+      # decidim-ai keeps its own Redis handles and ignores REDIS_URL.
+      DECIDIM_SPAM_DETECTION_BACKEND_RESOURCE_URL: redis://localhost:6379/2
+      DECIDIM_SPAM_DETECTION_BACKEND_USER_REDIS_URL: redis://localhost:6379/3
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - uses: browser-actions/setup-chrome@v2
+        with:
+          install-chromedriver: true
+
+      - run: npm ci
+
+      - name: Generate the test application
+        run: bundle exec rake test_app
+
+      - name: Precompile assets
+        run: bundle exec rails assets:precompile
+        working-directory: spec/decidim_dummy_app
+        env:
+          RAILS_ENV: test
+
+      - name: RSpec
+        run: bundle exec rspec
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: rspec-failure-artefacts
+          path: |
+            spec/decidim_dummy_app/tmp/screenshots
+            spec/decidim_dummy_app/log/test.log
+          if-no-files-found: ignore

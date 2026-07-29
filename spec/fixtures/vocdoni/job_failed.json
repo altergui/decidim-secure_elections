@@ -1,0 +1,9 @@
+{
+  "jobId": "6885f1a3c1a4e2f0b1d33a10",
+  "type": "publish_voting_process",
+  "status": "failed",
+  "result": {
+    "status": "READY"
+  },
+  "errors": ["not enough balance to create the election", "tx not committed"]
+}

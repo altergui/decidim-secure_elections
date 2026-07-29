@@ -1,0 +1,48 @@
+{
+  "id": "6885f0c2c1a4e2f0b1d33a01",
+  "orgAddress": "8f71faa8771d4aaddcde1066d8e4486b677e928e",
+  "published": true,
+  "title": {
+    "default": "Board election 2026",
+    "en": "Board election 2026",
+    "ca": "Eleccions a la junta 2026"
+  },
+  "description": {
+    "default": "Pick the next chair of the board."
+  },
+  "startDate": "2026-07-27T14:51:08Z",
+  "endDate": "2026-07-29T14:51:08Z",
+  "chainId": "vocdoni/LTS/1.2",
+  "census": {
+    "authFields": ["memberNumber"],
+    "twoFaFields": [],
+    "weighted": false,
+    "size": 3,
+    "totalWeight": 3
+  },
+  "questions": [
+    {
+      "id": "6885f0c2c1a4e2f0b1d33a02",
+      "parentProcessId": "6885f0c2c1a4e2f0b1d33a01",
+      "upstreamId": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+      "title": {
+        "default": "Who should chair the board?",
+        "en": "Who should chair the board?"
+      },
+      "choices": [
+        { "title": { "default": "Alice" }, "value": 0 },
+        { "title": { "default": "Bob" }, "value": 1 }
+      ],
+      "ballotProtocol": null,
+      "type": "singlechoice",
+      "secretUntilTheEnd": false,
+      "status": "ONGOING",
+      "results": {
+        "voteCount": 2,
+        "maxVoters": 3,
+        "finalResults": false,
+        "results": [["1", "1"]]
+      }
+    }
+  ]
+}

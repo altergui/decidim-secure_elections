@@ -1,0 +1,20 @@
+<%# Step 2 of 5: the ballot. Locked until the election has a title; read-only
+    once the process is on chain. %>
+<% add_decidim_page_title(t(".title")) %>
+
+<%= render partial: "decidim/secure_elections/admin/shared/election_header", locals: { election: } %>
+<%= render partial: "decidim/secure_elections/admin/shared/nav", locals: { election: } %>
+
+<div class="item__edit item__edit-1col">
+  <div class="item__edit-form">
+    <%= decidim_form_for(@form,
+                         url: election_questions_path(election),
+                         method: :patch,
+                         html: { id: "edit-election-questions-form", class: "form-defaults form edit_election_questions" }) do |f| %>
+      <%= render partial: "decidim/secure_elections/admin/questions/questions_fields", locals: { form: f, election: } %>
+
+      <%= render partial: "decidim/secure_elections/admin/shared/step_footer",
+                 locals: { election:, step: :questions, form: f } %>
+    <% end %>
+  </div>
+</div>

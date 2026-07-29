@@ -1,0 +1,83 @@
+# Reference deployment for a Decidim application running decidim-secure_elections.
+#
+# Build context is the Decidim *application* root (the app that has this module
+# in its Gemfile), not the module repository:
+#
+#   docker compose -f path/to/decidim-secure_elections/docker/compose.yml \
+#     --project-directory . up -d --build
+#
+# Copy .env.example to .env in the application root first — the app refuses to
+# boot without VOCDONI_API_URL, VOCDONI_API_KEY and VOCDONI_ORG_ADDRESS.
+
+name: decidim-secure_elections
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ${VOCDONI_DOCKERFILE:-vendor/decidim-secure_elections/docker/Dockerfile}
+    env_file: [.env]
+    environment:
+      RAILS_ENV: ${RAILS_ENV:-production}
+      DATABASE_HOST: postgres
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-decidim}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-decidim}
+      REDIS_URL: redis://redis:6379/0
+      # decidim-ai holds its own Redis handles and ignores REDIS_URL.
+      DECIDIM_SPAM_DETECTION_BACKEND_RESOURCE_URL: redis://redis:6379/2
+      DECIDIM_SPAM_DETECTION_BACKEND_USER_REDIS_URL: redis://redis:6379/3
+    ports: ["3000:3000"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    restart: unless-stopped
+
+  # Vocdoni publishes, status changes and results syncs all run as background
+  # jobs — the web process never calls the SaaS API inline. This worker is
+  # required, not optional.
+  worker:
+    build:
+      context: .
+      dockerfile: ${VOCDONI_DOCKERFILE:-vendor/decidim-secure_elections/docker/Dockerfile}
+    command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
+    env_file: [.env]
+    environment:
+      RAILS_ENV: ${RAILS_ENV:-production}
+      DATABASE_HOST: postgres
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-decidim}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-decidim}
+      REDIS_URL: redis://redis:6379/0
+      DECIDIM_SPAM_DETECTION_BACKEND_RESOURCE_URL: redis://redis:6379/2
+      DECIDIM_SPAM_DETECTION_BACKEND_USER_REDIS_URL: redis://redis:6379/3
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16.1
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME:-decidim}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-decidim}
+      POSTGRES_DB: decidim
+    volumes: ["postgres-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME:-decidim}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.2
+    volumes: ["redis-data:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  redis-data:

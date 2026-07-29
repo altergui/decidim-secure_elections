@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/vocdoni/decidim-secure_elections/security/advisories/new
+    about: Report privately. Never in a public issue.
+  - name: Question about using the module
+    url: https://github.com/vocdoni/decidim-secure_elections/discussions
+    about: Ask in Discussions rather than opening an issue.
+  - name: Bug in Decidim itself
+    url: https://github.com/decidim/decidim/issues
+    about: Report it upstream.
+  - name: Bug in the Vocdoni protocol or SaaS API
+    url: https://github.com/vocdoni/vocdoni-node/issues
+    about: Report it upstream.

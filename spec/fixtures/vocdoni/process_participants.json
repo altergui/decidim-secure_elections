@@ -1,0 +1,17 @@
+{
+  "participants": [
+    {
+      "memberId": "6a677022622d94e7c9a19301",
+      "name": "Alice",
+      "surname": "Doe",
+      "memberNumber": "1001",
+      "questions": [
+        {
+          "questionId": "6885f0c2c1a4e2f0b1d33a02",
+          "upstreamId": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "hasVoted": true
+        }
+      ]
+    }
+  ]
+}

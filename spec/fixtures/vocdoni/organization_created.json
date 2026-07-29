@@ -1,0 +1,9 @@
+{
+  "address": "0x0000000000000000000000000000000000000001",
+  "name": "Decidim Barcelona",
+  "type": "association",
+  "website": "https://example.org",
+  "country": "ES",
+  "timezone": "Europe/Madrid",
+  "active": true
+}
